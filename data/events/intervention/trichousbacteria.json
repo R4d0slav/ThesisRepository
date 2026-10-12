@@ -1,0 +1,8 @@
+[
+    {
+        "trigger": "time > 1000",
+        "assignments": {
+            "s_trichousbacteria_cyt_f": "s_trichousbacteria_cyt_f + 0.001"
+        }
+    }
+]

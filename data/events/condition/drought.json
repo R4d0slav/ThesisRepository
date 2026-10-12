@@ -1,0 +1,4 @@
+{
+    "description": "Drought stress as a perturbed initial condition (sustained exposure).",
+    "set_initial": { "s_Drought_cyt_ab": 0.05 }
+}

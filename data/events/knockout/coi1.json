@@ -1,0 +1,10 @@
+{
+    "knockouts": [
+        "s_COI1_nuc_g",
+        "s_COI1_cyt_p",
+        "s_COI1_cyt_pa",
+        "s_COI1_nuc_pa",
+        "s_COI1RBC_cyt_ca",
+        "s_COI1JAIleSCF_cyt_ca"
+    ]
+}

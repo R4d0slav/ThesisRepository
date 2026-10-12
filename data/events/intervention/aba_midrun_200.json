@@ -1,0 +1,6 @@
+[
+    {
+        "trigger": "time > 200",
+        "assignments": { "s_ABA_cyt_m": "s_ABA_cyt_m + 0.5" }
+    }
+]

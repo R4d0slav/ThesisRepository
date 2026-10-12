@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSS Kinetic Modelling — Pipeline</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script>
+        // Apply saved theme before first paint to avoid a flash of the wrong theme.
+        (function () {
+            try {
+                var saved = localStorage.getItem('pss-theme');
+                if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+    <div class="shell">
+
+        <!-- ── TOP BAR ─────────────────────────────────── -->
+        <header class="topbar">
+            <div class="topbar-brand">
+                <div class="topbar-logo-mark">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="10" r="3" fill="var(--accent)"/>
+                        <circle cx="10" cy="10" r="7" stroke="var(--accent)" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>
+                        <circle cx="10" cy="3"  r="1.5" fill="var(--accent2)" opacity="0.8"/>
+                        <circle cx="17" cy="14" r="1.5" fill="var(--stage3)" opacity="0.8"/>
+                        <circle cx="3"  cy="14" r="1.5" fill="var(--stage4)" opacity="0.8"/>
+                        <line x1="10" y1="7"  x2="10" y2="3"  stroke="var(--accent2)" stroke-width="0.8" opacity="0.4"/>
+                        <line x1="12.6" y1="11.5" x2="15.5" y2="13" stroke="var(--stage3)" stroke-width="0.8" opacity="0.4"/>
+                        <line x1="7.4"  y1="11.5" x2="4.5"  y2="13" stroke="var(--stage4)" stroke-width="0.8" opacity="0.4"/>
+                    </svg>
+                </div>
+                <div class="topbar-text">
+                    <span class="topbar-project">PSS</span>
+                    <span class="topbar-sep">·</span>
+                    <span class="topbar-subtitle">Kinetic Modelling Pipeline</span>
+                </div>
+            </div>
+            <div class="topbar-right">
+                <div id="globalStatus" class="run-status">
+                    <span class="status-dot"></span>
+                    <span class="status-text">IDLE</span>
+                </div>
+                <div class="topbar-divider"></div>
+                <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()" title="Toggle light / dark theme" aria-label="Toggle theme">
+                    <svg class="icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+                    </svg>
+                    <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4"/>
+                        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+                    </svg>
+                </button>
+                <span class="kbd-hint" title="Press R to run">R</span>
+                <button id="btn-stop" class="btn btn-stop" onclick="stopPipeline()" style="display:none;" title="Stop the running pipeline">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><rect x="1.5" y="1.5" width="7" height="7" rx="1.2" fill="currentColor"/></svg>
+                    Stop
+                </button>
+                <button id="btn-run" class="btn btn-primary" onclick="startPipeline()">
+                    <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9" fill="currentColor"/></svg>
+                    Run Pipeline
+                </button>
+            </div>
+        </header>
+
+        <!-- ── SIDEBAR ─────────────────────────────────── -->
+        <nav class="sidebar">
+            <div class="sidebar-section">Execution</div>
+            <div class="nav-item active" onclick="showPanel('overview')" data-panel="overview">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="8" y="1" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="1" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/><rect x="8" y="8" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+                </span>
+                Overview
+            </div>
+            <div class="nav-item" onclick="showPanel('config')" data-panel="config">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.9 2.9l1.4 1.4M9.7 9.7l1.4 1.4M2.9 11.1l1.4-1.4M9.7 4.3l1.4-1.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </span>
+                Configuration
+                <span class="nav-badge" id="badge-config">4 paths</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('sim')" data-panel="sim">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><polyline points="1,10 4,6 7,8 10,3 13,5" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                Sim Conditions
+                <span class="nav-badge" id="badge-sim">2</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('logs')" data-panel="logs">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="2" width="10" height="10" rx="2" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="4.5" y1="5" x2="9.5" y2="5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="4.5" y1="7" x2="9.5" y2="7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><line x1="4.5" y1="9" x2="7" y2="9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                </span>
+                Live Logs
+                <span class="nav-badge" id="badge-logs">—</span>
+            </div>
+
+            <div class="sidebar-section">Data Explorer</div>
+            <div class="nav-item" onclick="showPanel('data-browser')" data-panel="data-browser">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><path d="M2 3h4l1.5 1.5H12a1 1 0 0 1 1 1V11a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
+                </span>
+                Input Data
+            </div>
+            <div class="nav-item" onclick="showPanel('results-browser')" data-panel="results-browser">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="8" width="2" height="4" fill="currentColor" rx="0.5" opacity="0.5"/><rect x="5.5" y="5" width="2" height="7" fill="currentColor" rx="0.5" opacity="0.7"/><rect x="9" y="2" width="2" height="10" fill="currentColor" rx="0.5"/></svg>
+                </span>
+                Results
+            </div>
+            <div class="nav-item" onclick="showPanel('compare')" data-panel="compare">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="8" width="2" height="4" fill="currentColor" rx="0.5" opacity="0.5"/><rect x="5.5" y="5" width="2" height="7" fill="currentColor" rx="0.5" opacity="0.7"/><rect x="9" y="2" width="2" height="10" fill="currentColor" rx="0.5"/></svg>
+                </span>
+                Comparison
+            </div>
+            <div class="nav-item" onclick="showPanel('task-inspector')" data-panel="task-inspector">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="9" y1="9" x2="13" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </span>
+                Task Inspector
+                <span class="nav-badge" id="badge-tasks">—</span>
+            </div>
+
+            <div class="sidebar-section">Analysis</div>
+            <div class="nav-item" onclick="showPanel('quality')" data-panel="quality">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1L13 12H1L7 1z" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="7" y1="5" x2="7" y2="8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="10" r="0.7" fill="currentColor"/></svg>
+                </span>
+                Quality Checks
+                <span class="nav-badge" id="badge-quality">—</span>
+            </div>
+            <div class="nav-item" onclick="showPanel('param-scan')" data-panel="param-scan">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><line x1="2" y1="12" x2="2" y2="2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><polyline points="2,10 5,6 8,8 12,3" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="2" cy="10" r="1.5" fill="currentColor"/><circle cx="5" cy="6" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="3" r="1.5" fill="currentColor"/></svg>
+                </span>
+                Parameter Scan
+            </div>
+
+            <div class="sidebar-section">Visualisation</div>
+            <div class="nav-item" onclick="showPanel('sim-flow')" data-panel="sim-flow">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="2" fill="currentColor"/><circle cx="2" cy="4" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="12" cy="4" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="2" cy="10" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="12" cy="10" r="1.5" stroke="currentColor" stroke-width="1" fill="none"/><line x1="3.4" y1="4.7" x2="5.5" y2="6.2" stroke="currentColor" stroke-width="0.9"/><line x1="10.6" y1="4.7" x2="8.5" y2="6.2" stroke="currentColor" stroke-width="0.9"/><line x1="3.4" y1="9.3" x2="5.5" y2="7.8" stroke="currentColor" stroke-width="0.9"/><line x1="10.6" y1="9.3" x2="8.5" y2="7.8" stroke="currentColor" stroke-width="0.9"/></svg>
+                </span>
+                Simulation Flow
+            </div>
+            <div class="nav-item" onclick="showPanel('network')" data-panel="network">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="1.8" fill="currentColor"/><circle cx="2" cy="3" r="1.3" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="12" cy="3" r="1.3" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="2" cy="11" r="1.3" stroke="currentColor" stroke-width="1" fill="none"/><circle cx="12" cy="11" r="1.3" stroke="currentColor" stroke-width="1" fill="none"/><line x1="3.2" y1="3.8" x2="5.8" y2="6" stroke="currentColor" stroke-width="0.9" opacity="0.7"/><line x1="10.8" y1="3.8" x2="8.2" y2="6" stroke="currentColor" stroke-width="0.9" opacity="0.7"/><line x1="3.2" y1="10.2" x2="5.8" y2="8" stroke="currentColor" stroke-width="0.9" opacity="0.7"/><line x1="10.8" y1="10.2" x2="8.2" y2="8" stroke="currentColor" stroke-width="0.9" opacity="0.7"/></svg>
+                </span>
+                Network Viewer
+            </div>
+
+            <div class="sidebar-section">Documentation</div>
+            <div class="nav-item" onclick="showPanel('about')" data-panel="about">
+                <span class="nav-icon">
+                    <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" fill="none"/><line x1="7" y1="6" x2="7" y2="10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="7" cy="4" r="0.8" fill="currentColor"/></svg>
+                </span>
+                About
+            </div>
+        </nav>
+
+        <!-- ── MAIN CONTENT ─────────────────────────────── -->
+        <main class="main">
+
+            <!-- ══ OVERVIEW ══ -->
+            <div id="panel-overview" class="panel active">
+                <div class="panel-header">
+                    <h1>Pipeline Overview</h1>
+                    <p>Four-stage ODE modelling workflow — from PSS network extraction to multi-condition stress simulation.</p>
+                </div>
+
+                <!-- Status ribbon -->
+                <div class="status-ribbon" id="status-ribbon">
+                    <div class="ribbon-item">
+                        <span class="ribbon-label">Status</span>
+                        <span class="ribbon-value" id="ribbon-status">Idle</span>
+                    </div>
+                    <div class="ribbon-divider"></div>
+                    <div class="ribbon-item">
+                        <span class="ribbon-label">Progress</span>
+                        <span class="ribbon-value" id="ribbon-progress">0 / 4 stages</span>
+                    </div>
+                    <div class="ribbon-divider"></div>
+                    <div class="ribbon-item">
+                        <span class="ribbon-label">Active Conditions</span>
+                        <span class="ribbon-value" id="ribbon-conditions">2</span>
+                    </div>
+                    <div class="ribbon-divider"></div>
+                    <div class="ribbon-item">
+                        <span class="ribbon-label">Executor</span>
+                        <span class="ribbon-value" id="ribbon-executor">local</span>
+                    </div>
+                </div>
+
+                <!-- Pipeline flow diagram -->
+                <div class="pipeline-flow">
+                    <!-- Stage 1 -->
+                    <div class="stage-card" data-stage="1">
+                        <div class="stage-top">
+                            <div class="stage-num-wrap">
+                                <span class="stage-num">01</span>
+                            </div>
+                            <div class="stage-status-wrap">
+                                <div class="stage-status" id="stage-status-1">PENDING</div>
+                            </div>
+                        </div>
+                        <div class="stage-title">PSS Processing</div>
+                        <div class="stage-desc">Parse the SBML network file and extract structured species and reaction maps for downstream modelling.</div>
+                        <div class="stage-io">
+                            <div class="io-item io-in">
+                                <span class="io-dot"></span>
+                                <span class="io-label">SBML network</span>
+                            </div>
+                            <div class="io-arrow">→</div>
+                            <div class="io-item io-out">
+                                <span class="io-dot"></span>
+                                <span class="io-label">species · reactions</span>
+                            </div>
+                        </div>
+                        <div class="stage-scripts">
+                            <span class="script-chip">process_pss.py</span>
+                        </div>
+                    </div>
+
+                    <div class="stage-connector">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="0" y1="12" x2="20" y2="12" stroke="var(--border2)" stroke-width="1.5" stroke-dasharray="3 2"/><polygon points="16,8 24,12 16,16" fill="var(--border2)"/></svg>
+                    </div>
+
+                    <!-- Stage 2 -->
+                    <div class="stage-card" data-stage="2">
+                        <div class="stage-top">
+                            <div class="stage-num-wrap">
+                                <span class="stage-num">02</span>
+                            </div>
+                            <div class="stage-status-wrap">
+                                <div class="stage-status" id="stage-status-2">PENDING</div>
+                            </div>
+                        </div>
+                        <div class="stage-title">Parameter Mapping</div>
+                        <div class="stage-desc">Four parallel mappers infer decay rates, initial concentrations, rate laws, and kinetic parameters.</div>
+                        <div class="stage-io">
+                            <div class="io-item io-in">
+                                <span class="io-dot"></span>
+                                <span class="io-label">TSV · CSV · XLSX</span>
+                            </div>
+                            <div class="io-arrow">→</div>
+                            <div class="io-item io-out">
+                                <span class="io-dot"></span>
+                                <span class="io-label">4 mappers</span>
+                            </div>
+                        </div>
+                        <div class="stage-scripts">
+                            <span class="script-chip">decay_rates.py</span>
+                            <span class="script-chip">concentrations.py</span>
+                            <span class="script-chip">rate_laws.py</span>
+                            <span class="script-chip">kinetic_parameters.py</span>
+                        </div>
+                        <!-- Sub-process tracker -->
+                        <div class="sub-process-row" id="stage2-subprocs"></div>
+                    </div>
+
+                    <div class="stage-connector">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="0" y1="12" x2="20" y2="12" stroke="var(--border2)" stroke-width="1.5" stroke-dasharray="3 2"/><polygon points="16,8 24,12 16,16" fill="var(--border2)"/></svg>
+                    </div>
+
+                    <!-- Stage 3 -->
+                    <div class="stage-card" data-stage="3">
+                        <div class="stage-top">
+                            <div class="stage-num-wrap">
+                                <span class="stage-num">03</span>
+                            </div>
+                            <div class="stage-status-wrap">
+                                <div class="stage-status" id="stage-status-3">PENDING</div>
+                            </div>
+                        </div>
+                        <div class="stage-title">Model Assembly</div>
+                        <div class="stage-desc">Merges all parameter mappers with the network topology to produce a single Antimony ODE model file.</div>
+                        <div class="stage-io">
+                            <div class="io-item io-in">
+                                <span class="io-dot"></span>
+                                <span class="io-label">4 mappers</span>
+                            </div>
+                            <div class="io-arrow">→</div>
+                            <div class="io-item io-out">
+                                <span class="io-dot"></span>
+                                <span class="io-label">Antimony model</span>
+                            </div>
+                        </div>
+                        <div class="stage-scripts">
+                            <span class="script-chip">build_antimony.py</span>
+                        </div>
+                    </div>
+
+                    <div class="stage-connector">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><line x1="0" y1="12" x2="20" y2="12" stroke="var(--border2)" stroke-width="1.5" stroke-dasharray="3 2"/><polygon points="16,8 24,12 16,16" fill="var(--border2)"/></svg>
+                    </div>
+
+                    <!-- Stage 4 -->
+                    <div class="stage-card" data-stage="4">
+                        <div class="stage-top">
+                            <div class="stage-num-wrap">
+                                <span class="stage-num">04</span>
+                            </div>
+                            <div class="stage-status-wrap">
+                                <div class="stage-status" id="stage-status-4">PENDING</div>
+                            </div>
+                        </div>
+                        <div class="stage-title">ODE Simulation</div>
+                        <div class="stage-desc">Integrates the ODE system across all defined conditions — KO, drought, heat, JA, and others — in parallel.</div>
+                        <div class="stage-io">
+                            <div class="io-item io-in">
+                                <span class="io-dot"></span>
+                                <span class="io-label">Antimony + events</span>
+                            </div>
+                            <div class="io-arrow">→</div>
+                            <div class="io-item io-out">
+                                <span class="io-dot"></span>
+                                <span class="io-label">plots · tables · HTML</span>
+                            </div>
+                        </div>
+                        <div class="stage-scripts">
+                            <span class="script-chip">simulate.py</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress bar -->
+                <div class="progress-section">
+                    <div class="progress-meta">
+                        <span class="progress-label-text">Pipeline Progress</span>
+                        <span class="progress-pct-text" id="progress-pct">0 / 4 stages complete</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ CONFIG ══ -->
+            <div id="panel-config" class="panel">
+                <div class="panel-header">
+                    <h1>Configuration</h1>
+                    <p>Set file paths and runtime options before launching the pipeline.</p>
+                </div>
+
+                <div class="config-grid">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--stage1)"></span>
+                            <h3>File Paths</h3>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Data Path</label>
+                                <input type="text" id="path-data" value="data/" placeholder="data/">
+                                <span class="form-hint">Root folder for all input files (SBML, TSV, CSV, XLSX)</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Scripts Path</label>
+                                <input type="text" id="path-scripts" value="scripts/modeling" placeholder="scripts/modeling">
+                                <span class="form-hint">Directory containing the Python modelling scripts</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Events Path</label>
+                                <input type="text" id="path-events" value="data/events" placeholder="data/events">
+                                <span class="form-hint">Folder with per-condition perturbation JSON files</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Subset Tag</label>
+                                <input type="text" id="s3-subset" value="all" placeholder="all">
+                                <span class="form-hint">Identifier passed to downstream scripts for subsetting</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Degradation Law</label>
+                                <select id="s3-decay-form">
+                                    <option value="first-order" selected>first-order — δ·[X] (corrected)</option>
+                                    <option value="saturating">saturating — δ·[X]/(1e-4+[X]) (legacy)</option>
+                                </select>
+                                <span class="form-hint">The legacy saturating law drains metabolites ~10,000&times; too fast and blocks mid-run event injection</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--stage2)"></span>
+                            <h3>Runtime Options</h3>
+                        </div>
+                        <div class="form-group mb-md">
+                            <label>Executor Profile</label>
+                            <select id="cfg-profile">
+                                <option value="local">Local — laptop / workstation</option>
+                                <option value="slurm">SLURM — HPC cluster</option>
+                                <option value="debug">Debug — verbose output</option>
+                            </select>
+                            <span class="form-hint">Determines job executor and resource limits (see nextflow.config)</span>
+                        </div>
+                        <div class="form-group mb-md">
+                            <label>Solver Tuning <span class="form-label-note">— stiff models</span></label>
+                            <div class="form-grid form-grid-3">
+                                <div class="form-group">
+                                    <label class="label-sm">Relative tol.</label>
+                                    <input type="text" id="cfg-rel-tol" inputmode="decimal" placeholder="default">
+                                    <span class="form-hint">Looser = larger (e.g. 1e-4)</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="label-sm">Absolute tol.</label>
+                                    <input type="text" id="cfg-abs-tol" inputmode="decimal" placeholder="default">
+                                    <span class="form-hint">e.g. 1e-10</span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="label-sm">Max steps</label>
+                                    <input type="text" id="cfg-max-steps" inputmode="numeric" value="50000" placeholder="default">
+                                    <span class="form-hint">Default 50000 · raise for stiff runs (e.g. 200000)</span>
+                                </div>
+                            </div>
+                            <span class="form-hint">CVODE integrator overrides applied to every condition. Leave blank to keep solver defaults. Loosen tolerances or raise max steps if a run fails with <code>CV_CONV_FAILURE</code>.</span>
+                        </div>
+                        <div class="toggle-row toggle-row-sep">
+                            <div class="toggle-info">
+                                <div class="toggle-label">Resume Previous Run</div>
+                                <div class="toggle-desc">Skip already-completed tasks using Nextflow's <code>-resume</code> flag. Useful when re-running after a partial failure.</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" id="cfg-resume">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                        <div class="toggle-row toggle-row-sep">
+                            <div class="toggle-info">
+                                <div class="toggle-label">Clean Workspace</div>
+                                <div class="toggle-desc">Deletes all results, Nextflow cache, and work directory. Conda environments are preserved.</div>
+                            </div>
+                            <button id="btn-clean" class="btn-clean" onclick="cleanWorkspace()">
+                                <svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 4h8l-.7 6.3a.5.5 0 0 1-.5.7H3.2a.5.5 0 0 1-.5-.7L2 4z" stroke="currentColor" stroke-width="1" fill="none"/><line x1="1" y1="3" x2="11" y2="3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M4.5 3V2h3v1" stroke="currentColor" stroke-width="1" fill="none"/></svg>
+                                Clean
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <span class="section-dot" style="background:var(--stage3)"></span>
+                        <h3>Command Preview</h3>
+                    </div>
+                    <div class="cmd-block" id="cmd-preview"></div>
+                    <p class="form-hint mt">Command updates live as you change the options above.</p>
+                </div>
+            </div>
+
+            <!-- ══ SIM CONDITIONS ══ -->
+            <div id="panel-sim" class="panel">
+                <div class="panel-header">
+                    <h1>Simulation Conditions</h1>
+                    <p>Define stress conditions to simulate. Each enabled row becomes a parallel Nextflow task in Stage 4.</p>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <span class="section-dot" style="background:var(--stage4)"></span>
+                        <h3>Condition Matrix</h3>
+                        <span class="section-count" id="sim-count-label">2 conditions active</span>
+                        <button class="btn-add-sim" onclick="addSimRow()">+ Add Condition</button>
+                    </div>
+
+                    <div class="sim-table-wrap">
+                        <div class="sim-header-row">
+                            <span class="sim-col-en">En.</span>
+                            <span class="sim-col-suffix">Suffix / ID</span>
+                            <span class="sim-col-num">Start</span>
+                            <span class="sim-col-num">End</span>
+                            <span class="sim-col-num">Points</span>
+                            <span class="sim-col-events">Events File / JSON</span>
+                            <span class="sim-col-del"></span>
+                        </div>
+                        <datalist id="events-datalist"></datalist>
+                        <div id="sim-conditions" class="sim-conditions"></div>
+                    </div>
+
+                    <div class="sim-help">
+                        <div class="sim-help-item">
+                            <span class="help-key">Suffix</span>
+                            <span class="help-val">Label appended to all output files for this condition (e.g. <code>drought</code>, <code>ja</code>)</span>
+                        </div>
+                        <div class="sim-help-item">
+                            <span class="help-key">Start / End</span>
+                            <span class="help-val">Integration time window in model time units</span>
+                        </div>
+                        <div class="sim-help-item">
+                            <span class="help-key">Points</span>
+                            <span class="help-val">Number of output time points for the ODE solver</span>
+                        </div>
+                        <div class="sim-help-item">
+                            <span class="help-key">Events</span>
+                            <span class="help-val">Path to a JSON file defining perturbation events, or paste raw JSON directly</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ LOGS ══ -->
+            <div id="panel-logs" class="panel">
+                <div class="panel-header">
+                    <h1>Live Logs</h1>
+                    <p>Real-time Nextflow output stream. Switch between clean summary and full raw output.</p>
+                </div>
+
+                <!-- Stage mini-tracker — mirrors the Overview stage cards inline -->
+                <div class="log-stage-strip" id="log-stage-strip">
+                    <div class="log-stage-item" id="log-stage-1">
+                        <span class="log-stage-num">01</span>
+                        <span class="log-stage-label">PSS Processing</span>
+                        <span class="log-stage-badge" id="log-stage-badge-1">PENDING</span>
+                    </div>
+                    <span class="log-stage-arrow">→</span>
+                    <div class="log-stage-item" id="log-stage-2">
+                        <span class="log-stage-num">02</span>
+                        <span class="log-stage-label">Param Mapping</span>
+                        <span class="log-stage-badge" id="log-stage-badge-2">PENDING</span>
+                    </div>
+                    <span class="log-stage-arrow">→</span>
+                    <div class="log-stage-item" id="log-stage-3">
+                        <span class="log-stage-num">03</span>
+                        <span class="log-stage-label">Model Assembly</span>
+                        <span class="log-stage-badge" id="log-stage-badge-3">PENDING</span>
+                    </div>
+                    <span class="log-stage-arrow">→</span>
+                    <div class="log-stage-item" id="log-stage-4">
+                        <span class="log-stage-num">04</span>
+                        <span class="log-stage-label">ODE Simulation</span>
+                        <span class="log-stage-badge" id="log-stage-badge-4">PENDING</span>
+                    </div>
+                </div>
+
+                <div class="log-container">
+                    <div class="log-topbar">
+                        <div class="log-traffic-lights">
+                            <span class="log-dot" style="background:#ff5f57"></span>
+                            <span class="log-dot" style="background:#febc2e"></span>
+                            <span class="log-dot" style="background:#28c840"></span>
+                        </div>
+                        <span class="log-topbar-title">pipeline.stdout</span>
+                        <span class="log-count" id="log-count">0 lines</span>
+                        <div class="log-actions">
+                            <button class="btn-tab active" id="btn-log-clean" onclick="setLogSource('clean')">Clean</button>
+                            <button class="btn-tab" id="btn-log-raw" onclick="setLogSource('raw')">Raw</button>
+                        </div>
+                    </div>
+                    <div id="log-body" class="log-body">
+                        <div class="log-line"><span class="log-msg dim">— Waiting for pipeline to start —</span></div>
+                    </div>
+                </div>
+
+                <div id="errors-container" class="mt-md" style="display:none">
+                    <div class="error-panel">
+                        <div class="error-panel-header">
+                            <svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1L13 12H1L7 1z" stroke="var(--danger)" stroke-width="1.2" fill="none"/><line x1="7" y1="5" x2="7" y2="8" stroke="var(--danger)" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="10" r="0.7" fill="var(--danger)"/></svg>
+                            Pipeline Errors
+                        </div>
+                        <div id="errors-list" class="error-panel-body"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ DATA BROWSER ══ -->
+            <div id="panel-data-browser" class="panel">
+                <div class="panel-header">
+                    <h1>Input Data</h1>
+                    <p>Browse the <code>data/</code> directory. Click any file to preview its contents.</p>
+                </div>
+                <div class="browser-layout">
+                    <div id="data-tree" class="browser-sidebar"></div>
+                    <div id="data-preview" class="browser-main">
+                        <span class="browser-empty">Select a file to preview its contents.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ RESULTS BROWSER ══ -->
+            <div id="panel-results-browser" class="panel">
+                <div class="panel-header">
+                    <h1>Results</h1>
+                    <p>Browse pipeline output files. To compare simulations, go to the Comparison tab.</p>
+                </div>
+                <div class="browser-layout">
+                    <div id="results-tree" class="browser-sidebar"></div>
+                    <div id="results-preview" class="browser-main">
+                        <span class="browser-empty">Results will appear here after a successful run.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ COMPARISON ══ -->
+            <div id="panel-compare" class="panel">
+                <div class="panel-header">
+                    <h1>Comparison</h1>
+                    <p>Pick simulation result tables below, then run a comparison. Each simulation becomes a coloured series across all charts.</p>
+                </div>
+
+                <div class="compare-selected-wrap">
+                    <div class="compare-selected-title">
+                        Available simulations
+                        <button class="btn-tab" onclick="loadCompareCandidates()">↻ Refresh</button>
+                    </div>
+                    <div id="compare-picker" class="quality-file-list compare-picker-list">
+                        <span class="browser-empty">Loading…</span>
+                    </div>
+                    <div class="compare-selected-title compare-selected-gap">Selected</div>
+                    <div id="compare-selected" class="compare-selected">
+                        <span class="browser-empty">No simulations selected yet.</span>
+                    </div>
+                </div>
+
+                <!-- run bar -->
+                <div class="compare-run-bar">
+                    <label class="compare-run-label">Baseline
+                        <select id="compare-baseline"></select>
+                    </label>
+                    <button id="btn-run-compare" class="btn-tab active" onclick="runSimulationCompare()">Run comparison</button>
+                    <button class="btn-tab" onclick="clearSimulationCompare()">Clear</button>
+                    <div id="compare-status" class="compare-status" style="display:none"></div>
+                </div>
+
+                <!-- ── FOCUS SPECIES SECTION ─────────────────────────── -->
+                <div class="compare-section">
+                    <div class="compare-section-header">
+                        <div class="compare-section-label">Focus species</div>
+                        <div class="compare-focus-picker">
+                            <input id="compare-focus-input" type="text"
+                                   placeholder="Search species…"
+                                   autocomplete="off"
+                                   oninput="onFocusSpeciesInput(this.value)"
+                                   onfocus="showFocusDropdown()"
+                                   onkeydown="onFocusSpeciesKeydown(event)">
+                            <div id="compare-focus-dropdown" class="compare-focus-dropdown" style="display:none"></div>
+                        </div>
+                        <span id="compare-focus-label" class="compare-focus-current">—</span>
+                    </div>
+
+                    <div id="compare-kpis" class="compare-kpis">
+                        <span class="browser-empty">Run a comparison to see summary metrics.</span>
+                    </div>
+
+                    <div class="compare-chart-grid">
+                        <div class="compare-chart-card">
+                            <div class="compare-subtitle">Trajectories</div>
+                            <div class="compare-chart-wrap compact"><canvas id="compare-chart"></canvas></div>
+                        </div>
+                        <div class="compare-chart-card">
+                            <div class="compare-subtitle">Delta vs baseline</div>
+                            <div class="compare-chart-wrap compact"><canvas id="compare-delta-chart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── SPECIES SPACE: T-SNE (full trajectory) ─────────── -->
+                <div class="compare-section compare-section-independent">
+                    <div class="compare-section-header">
+                        <div class="compare-section-label">Species space — T-SNE</div>
+                        <span class="compare-section-hint">each point = full trajectory of one species in one simulation · colour = simulation · clusters = similar dynamics across time</span>
+                    </div>
+                    <p id="compare-tsne-full-note" class="browser-empty mb-sm">Run comparison to generate species embedding.</p>
+                    <div class="compare-chart-wrap species-space"><canvas id="compare-tsne-full-chart"></canvas></div>
+                </div>
+
+                <!-- ── SPECIES SPACE: Dot plot (per timepoint) ────────── -->
+                <div class="compare-section compare-section-independent">
+                    <div class="compare-section-header">
+                        <div class="compare-section-label">Species space — Dot plot (per timepoint)</div>
+                        <span class="compare-section-hint">1 dot per species per simulation · colour = simulation · hover = name</span>
+                        <div class="embed-controls mb-0">
+                            <label class="embed-slider-label">
+                                T
+                                <input id="embed-timepoint" type="range" min="0" max="24" step="1" value="24"
+                                       oninput="renderSpeciesFrameAt(parseInt(this.value))">
+                                <span id="embed-timepoint-val">—</span>
+                            </label>
+                        </div>
+                    </div>
+                    <p id="compare-tsne-snap-note" class="browser-empty mb-sm">Run comparison to generate species embedding.</p>
+                    <div class="compare-chart-wrap species-space"><canvas id="compare-tsne-snap-chart"></canvas></div>
+                </div>
+
+                <!-- ── RANKINGS ───────────────────────────────────────── -->
+                <div class="compare-ranking-wrap">
+                    <div class="compare-block-header">
+                        <div class="compare-subtitle">Top changed species</div>
+                        <label class="compare-inline-label">
+                            Rank by
+                            <select id="compare-rank-metric" onchange="renderSpeciesRanking(state.comparePayload)">
+                                <option value="max_abs_steady_state_pct_diff">Steady-state % diff</option>
+                                <option value="max_abs_timepoint_pct_diff">Timepoint % diff</option>
+                                <option value="max_cumulative_difference">Cumulative diff</option>
+                                <option value="max_auc_difference">AUC diff</option>
+                                <option value="max_abs_final_change">Final concentration change</option>
+                                <option value="max_peak_shift">Peak shift</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div id="compare-ranking" class="compare-ranking">
+                        <span class="browser-empty">Run a comparison to rank species.</span>
+                    </div>
+                </div>
+
+                <details class="compare-details">
+                    <summary>Detailed metrics</summary>
+                    <div id="compare-summary" class="compare-summary">
+                        <span class="browser-empty">Detailed metrics will appear here.</span>
+                    </div>
+                </details>
+            </div>
+
+            <!-- ══ TASK INSPECTOR ══ -->
+            <div id="panel-task-inspector" class="panel">
+                <div class="panel-header">
+                    <h1>Task Inspector</h1>
+                    <p>Inspect Nextflow work directory tasks — view stdout, stderr, and execution scripts per process.</p>
+                </div>
+                <div class="task-inspector-layout">
+                    <div class="task-list-col">
+                        <div class="task-list-toolbar">
+                            <button class="btn-tab active" onclick="loadWorkTasks()">↻ Refresh</button>
+                        </div>
+                        <div id="task-list" class="task-list">
+                            <div class="task-empty">Click Refresh to load tasks.</div>
+                        </div>
+                    </div>
+                    <div class="task-viewer-col">
+                        <div id="task-file-tabs" class="task-file-tabs" style="display:none"></div>
+                        <div id="task-file-body" class="task-file-body">
+                            <span class="browser-empty">Select a task to inspect its output files.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ QUALITY CHECKS ══ -->
+            <div id="panel-quality" class="panel">
+                <div class="panel-header">
+                    <h1>Simulation Quality</h1>
+                    <p>Detect negative concentrations, non-stable species, and structural dead-ends across your simulation outputs.</p>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <span class="section-dot" style="background:var(--accent2)"></span>
+                        <h3>Simulation Files</h3>
+                        <div class="card-action-group">
+                            <button class="btn-tab" onclick="loadQualityFiles()">↻ Refresh</button>
+                            <button id="btn-run-quality" class="btn-tab active" onclick="runQualityCheck()">▶ Analyse</button>
+                            <div id="quality-status" class="compare-status" style="display:none"></div>
+                        </div>
+                    </div>
+                    <div id="quality-file-list" class="quality-file-list">
+                        <span class="browser-empty">Click Refresh to load simulation files.</span>
+                    </div>
+                </div>
+
+                <!-- ── REACTION ACTIVITY ── -->
+                <div class="section-card">
+                    <div class="section-card-header">
+                        <span class="section-dot" style="background:var(--stage3)"></span>
+                        <h3>Reaction Activity</h3>
+                        <div class="card-action-group">
+                            <button id="btn-run-reactions" class="btn-tab active" style="border-color:rgba(155,93,229,.4);color:var(--stage3)" onclick="runReactionActivity()">▶ Analyse</button>
+                            <div id="reaction-status" class="compare-status" style="display:none"></div>
+                        </div>
+                    </div>
+                    <p class="form-hint">Cumulative flux integral per reaction — the deterministic equivalent of a firing count. Select simulation files above, then click Analyse.</p>
+                    <div class="reaction-controls">
+                        <label class="reaction-top-n-label">
+                            Top
+                            <input id="reaction-top-n" type="number" value="20" min="1" max="500">
+                            reactions
+                        </label>
+                    </div>
+                    <div id="reaction-chart-wrap" style="display:none;position:relative">
+                        <canvas id="reaction-chart"></canvas>
+                    </div>
+                    <div id="reaction-empty" class="browser-empty">Select simulation files above and click Analyse.</div>
+                </div>
+
+                <div id="quality-results" style="display:none">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--text-mid)"></span>
+                            <h3>Summary</h3>
+                        </div>
+                        <div id="quality-summary"></div>
+                    </div>
+
+                    <div class="quality-cards-grid">
+                        <div class="quality-card quality-card-danger">
+                            <div class="quality-card-title">
+                                <svg width="13" height="13" viewBox="0 0 13 13"><path d="M6.5 1L12 11H1L6.5 1z" stroke="var(--danger)" stroke-width="1.2" fill="none"/><line x1="6.5" y1="4.5" x2="6.5" y2="7.5" stroke="var(--danger)" stroke-width="1.2" stroke-linecap="round"/><circle cx="6.5" cy="9.2" r="0.7" fill="var(--danger)"/></svg>
+                                Negative Concentrations
+                                <span id="quality-neg-count" class="quality-badge danger">0</span>
+                            </div>
+                            <p class="form-hint mb">Species whose concentration drops below zero — indicates model inconsistencies.</p>
+                            <div id="quality-negative" class="quality-species-list"></div>
+                        </div>
+
+                        <div class="quality-card quality-card-warn">
+                            <div class="quality-card-title">
+                                <svg width="13" height="13" viewBox="0 0 13 13"><polyline points="1,10 4,5 7,8 10,2 13,4" stroke="var(--warn)" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                Non-Stable Species
+                                <span id="quality-unstable-count" class="quality-badge warn">0</span>
+                            </div>
+                            <p class="form-hint mb">Still oscillating or drifting in the final 10% of the time window — have not reached steady state.</p>
+                            <div id="quality-unstable" class="quality-species-list"></div>
+                        </div>
+
+                        <div class="quality-card quality-card-dim">
+                            <div class="quality-card-title">
+                                <svg width="13" height="13" viewBox="0 0 13 13"><path d="M2 3h3l1 1.5H11a1 1 0 0 1 1 1V10a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" stroke="currentColor" stroke-width="1.1" fill="none"/><line x1="5" y1="7" x2="9" y2="7" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+                                Dead-End Species
+                                <span id="quality-deadend-count" class="quality-badge dim">0</span>
+                            </div>
+                            <p class="form-hint mb">Structural sinks — products that never appear as reactants in any reaction in the network.</p>
+                            <div id="quality-deadend" class="quality-species-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ PARAMETER SCAN ══ -->
+            <div id="panel-param-scan" class="panel">
+                <div class="panel-header">
+                    <h1>Sensitivity Analysis</h1>
+                    <p>Vary a kinetic parameter or initial concentration and measure <b>how much it needs to change</b> before the simulation produces a detectably different result. A high minimum fold-change means the model is robust to that parameter; a low one means small changes have large effects.</p>
+                </div>
+
+                <div class="config-grid">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--accent2)"></span>
+                            <h3>Scan Configuration</h3>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Model File</label>
+                                <select id="scan-model-file" onchange="loadAntimonyFiles()">
+                                    <option value="Antimony.txt">Antimony.txt</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Scan Mode</label>
+                                <select id="scan-type" onchange="onScanTypeChange()">
+                                    <option value="fold" selected>Fold-change from nominal</option>
+                                    <option value="linear">Absolute — linear</option>
+                                    <option value="log">Absolute — log₁₀</option>
+                                </select>
+                            </div>
+                            <div class="form-group full">
+                                <label>Parameter / Species ID</label>
+                                <input type="text" id="scan-param" placeholder="e.g. kcat_rx00669 or [s_JA_cyt_m]" oninput="updateScanPreview()">
+                                <span class="form-hint" id="scan-param-nominal-hint"></span>
+                            </div>
+                            <div class="form-group" id="scan-min-group">
+                                <label id="scan-min-label">Min fold-change</label>
+                                <input type="number" id="scan-min" value="0.01" step="any" oninput="updateScanPreview()">
+                            </div>
+                            <div class="form-group" id="scan-max-group">
+                                <label id="scan-max-label">Max fold-change</label>
+                                <input type="number" id="scan-max" value="100" step="any" oninput="updateScanPreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Steps</label>
+                                <input type="number" id="scan-steps" value="12" min="2" max="25" oninput="updateScanPreview()">
+                            </div>
+                            <div class="form-group">
+                                <label>Sim End Time</label>
+                                <input type="number" id="scan-end" value="1000">
+                            </div>
+                            <div class="form-group">
+                                <label>Significance threshold (%)</label>
+                                <input type="number" id="scan-threshold" value="5" min="0.1" step="any" oninput="updateScanPreview();rerenderScanThreshold()">
+                                <span class="form-hint">Min % species change considered "different"</span>
+                            </div>
+                        </div>
+                        <div class="cmd-block scan-preview-wrap" id="scan-preview">—</div>
+                        <div class="scan-run-row">
+                            <button id="btn-run-scan" class="btn btn-primary" onclick="startParamScan()">▶ Run Scan</button>
+                            <div id="scan-status" class="compare-status" style="display:none"></div>
+                        </div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--stage3)"></span>
+                            <h3>Browse Parameters</h3>
+                            <button class="btn-add-sim" onclick="loadModelParams()">Load from Model</button>
+                        </div>
+                        <input id="scan-param-search" class="compare-search" type="text" placeholder="Filter parameters…" oninput="filterParamList()">
+                        <div id="scan-param-list" class="compare-species-list scan-param-list">
+                            <div class="browser-empty">Load model to browse available parameters.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="scan-results-wrap" style="display:none">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--accent)"></span>
+                            <h3>Minimum Change Required</h3>
+                            <span class="section-count">to produce a detectable difference</span>
+                        </div>
+                        <div id="scan-threshold-summary" class="scan-threshold-summary"></div>
+                        <div id="scan-sensitivity-ranking" class="compare-ranking"></div>
+                    </div>
+
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <span class="section-dot" style="background:var(--stage4)"></span>
+                            <h3>Concentration Heatmap</h3>
+                            <span class="section-count">top 20 species × scan values</span>
+                            <div class="card-action-group">
+                                <button class="btn-tab active" id="heatmap-abs-btn" onclick="setHeatmapMode('abs')">Absolute</button>
+                                <button class="btn-tab" id="heatmap-rel-btn" onclick="setHeatmapMode('rel')">% change from baseline</button>
+                            </div>
+                        </div>
+                        <div id="scan-heatmap" class="scan-heatmap"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ SIMULATION FLOW ══ -->
+            <div id="panel-sim-flow" class="panel">
+                <div class="panel-header">
+                    <h1>Simulation Network Flow</h1>
+                    <p>Overlay simulation concentrations on the PSS reaction network. Node colour and size reflect species concentrations at each time step — animate to follow signal flow.</p>
+                </div>
+                <div class="simflow-layout">
+                    <aside class="simflow-sidebar">
+
+                        <div class="simflow-block">
+                            <div class="simflow-subtitle">Simulation Data</div>
+                            <select id="simflow-sim-select" class="mb-sm">
+                                <option value="">— none —</option>
+                            </select>
+                            <button class="btn-tab simflow-load-btn" onclick="loadSimflowData()">Load</button>
+                        </div>
+
+                        <div class="simflow-block">
+                            <div class="simflow-subtitle">Filter</div>
+                            <label class="form-hint">Compartment</label>
+                            <select id="simflow-compartment" class="mb-sm" onchange="applySimflowFilter()">
+                                <option value="c_cyt">c_cyt (cytoplasm)</option>
+                            </select>
+                            <label class="form-hint">Species type</label>
+                            <select id="simflow-type" class="mb-sm" onchange="applySimflowFilter()">
+                                <option value="">All types</option>
+                            </select>
+                            <label class="form-hint">Min conc. threshold (log₁₀)</label>
+                            <input type="range" id="simflow-threshold" min="-15" max="0" value="-8" step="1" class="simflow-time-slider" oninput="refreshSimflowColors();document.getElementById('simflow-threshold-label').textContent='≥ 10^'+this.value">
+                            <div id="simflow-threshold-label" class="simflow-dim-label">≥ 10^-8</div>
+                        </div>
+
+                        <div class="simflow-block">
+                            <div class="simflow-subtitle">Colour by</div>
+                            <select id="simflow-color-mode" onchange="refreshSimflowColors()">
+                                <option value="abs">Absolute concentration (log scale)</option>
+                                <option value="rel">Fold-change vs t=0</option>
+                                <option value="type">Species type</option>
+                            </select>
+                        </div>
+
+                        <div class="simflow-block" id="simflow-time-block" style="display:none">
+                            <div class="simflow-subtitle">Time: <span id="simflow-time-val" style="color:var(--accent)">—</span></div>
+                            <input type="range" id="simflow-time-slider" min="0" max="999" value="0" class="simflow-time-slider" oninput="onSimflowTimeChange()">
+                            <div class="simflow-play-row">
+                                <button class="btn-tab" id="simflow-play-btn" onclick="toggleSimflowPlay()">▶ Play</button>
+                                <select id="simflow-speed">
+                                    <option value="100">1×</option>
+                                    <option value="50">2×</option>
+                                    <option value="20">5×</option>
+                                    <option value="10">10×</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="simflow-node-info" class="simflow-block" style="display:none">
+                            <div class="simflow-subtitle">Selected Node</div>
+                            <div id="simflow-node-detail" class="simflow-node-detail"></div>
+                            <canvas id="simflow-node-chart" class="simflow-node-chart"></canvas>
+                        </div>
+                    </aside>
+
+                    <div class="simflow-main-wrap">
+                        <div id="simflow-overlay" class="simflow-overlay">
+                            <span class="browser-empty">Load network data and a simulation to begin. Use the controls on the left.</span>
+                        </div>
+                        <div id="simflow-cy" class="simflow-cy"></div>
+                        <div id="simflow-legend" class="simflow-legend"></div>
+                        <div class="simflow-toolbar">
+                            <span id="simflow-node-count" class="simflow-node-count"></span>
+                            <button class="btn-tab" onclick="runForceLayout()" title="Re-run force-directed layout (slow for large graphs)">⟳ Force layout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══ NETWORK VIEWER ══ -->
+            <div id="panel-network" class="panel">
+                <div class="panel-header">
+                    <h1>PSS Network Viewer</h1>
+                    <p>Interactive graph of the PSS SBML network — 1,139 species · 864 reactions · 1,605 edges. Filter by node type or compartment, change layout, or animate signal flow.</p>
+                </div>
+                <div class="network-viewer-wrap">
+                    <iframe
+                        id="network-iframe"
+                        src="about:blank"
+                        data-src="/sbml_viewer"
+                        loading="lazy"
+                        class="network-iframe"
+                        sandbox="allow-scripts allow-same-origin"
+                        title="PSS SBML Network Viewer"
+                    ></iframe>
+                </div>
+            </div>
+
+            <!-- ══ ABOUT ══ -->
+            <div id="panel-about" class="panel">
+                <div class="panel-header">
+                    <h1>About This Pipeline</h1>
+                    <p>Background, methods, and usage guide for the PSS kinetic modelling workflow.</p>
+                </div>
+
+                <div class="about-grid">
+                    <div class="about-card about-card-wide">
+                        <div class="about-card-title">
+                            <span class="about-icon">🌱</span>
+                            What is PSS?
+                        </div>
+                        <p>The <strong>Plant Stress Signalling (PSS)</strong> knowledge network is a manually curated model of <em>Arabidopsis thaliana</em> stress response pathways. It encodes molecular interactions — phosphorylation, transcription factor binding, metabolite production — as a directed network in SBML format.</p>
+                        <p>This pipeline converts that static network into a <strong>dynamic kinetic model</strong> by assigning rate laws, decay rates, and initial concentrations to every species, then simulating the ODE system under various stress conditions (drought, heat, JA, KO).</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-card-title">
+                            <span class="about-icon">⚗️</span>
+                            Model Format
+                        </div>
+                        <p>The pipeline outputs an <strong>Antimony</strong> model — a human-readable ODE format compatible with <a href="http://tellurium.analogmachine.org/" target="_blank" class="about-link">Tellurium</a> / libRoadRunner. Antimony can be converted to SBML Level 2/3 for interoperability with other tools.</p>
+                        <p>Each reaction follows a Michaelis-Menten or mass-action rate law. Protein decay follows first-order kinetics using experimentally measured mRNA half-lives from the <em>Ath</em> decay rates dataset.</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-card-title">
+                            <span class="about-icon">⚡</span>
+                            Nextflow Integration
+                        </div>
+                        <p>The pipeline is implemented in <strong>Nextflow DSL2</strong>. Stages 1–3 run sequentially; within Stage 2, the four parameter-fitting scripts run in parallel. Stage 4 fans out across all defined simulation conditions simultaneously.</p>
+                        <p>Use the <code>-resume</code> flag to restart from the last successful checkpoint — Nextflow's caching layer avoids re-running completed tasks.</p>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-card-title">
+                            <span class="about-icon">📊</span>
+                            Output Files
+                        </div>
+                        <ul class="about-list">
+                            <li><code>simulatePSS/</code> — per-condition time-course plots, data tables, and interactive HTML dashboards</li>
+                            <li><code>buildAntimony/</code> — assembled Antimony model (<code>.ant</code>)</li>
+                            <li><code>processPSS/</code> — extracted species and reactions JSON</li>
+                            <li><code>logs/</code> — trace TSV, HTML execution report, Gantt timeline</li>
+                        </ul>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-card-title">
+                            <span class="about-icon">🔑</span>
+                            Keyboard Shortcuts
+                        </div>
+                        <div class="kbd-table">
+                            <div class="kbd-row"><kbd>R</kbd><span>Run pipeline</span></div>
+                            <div class="kbd-row"><kbd>1</kbd><span>Overview</span></div>
+                            <div class="kbd-row"><kbd>2</kbd><span>Configuration</span></div>
+                            <div class="kbd-row"><kbd>3</kbd><span>Sim Conditions</span></div>
+                            <div class="kbd-row"><kbd>4</kbd><span>Live Logs</span></div>
+                            <div class="kbd-row"><kbd>5</kbd><span>Input Data</span></div>
+                            <div class="kbd-row"><kbd>6</kbd><span>Results</span></div>
+                            <div class="kbd-row"><kbd>7</kbd><span>Comparison</span></div>
+                            <div class="kbd-row"><kbd>8</kbd><span>Network Viewer</span></div>
+                            <div class="kbd-row"><kbd>9</kbd><span>About</span></div>
+                        </div>
+                    </div>
+
+                    <div class="about-card">
+                        <div class="about-card-title">
+                            <span class="about-icon">📖</span>
+                            References
+                        </div>
+                        <ul class="about-list">
+                            <li>PSS Knowledge Network — <a href="https://github.com/NIB-SI/skm-pss-adapters" target="_blank" class="about-link">NIB-SI/skm-pss-adapters</a></li>
+                            <li>Antimony / Tellurium — <a href="https://tellurium.readthedocs.io" target="_blank" class="about-link">tellurium.readthedocs.io</a></li>
+                            <li>Nextflow — <a href="https://nextflow.io" target="_blank" class="about-link">nextflow.io</a></li>
+                            <li>Ath decay rates — Narsai <em>et al.</em> (2007), Plant Cell</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.29.2/cytoscape.min.js"></script>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

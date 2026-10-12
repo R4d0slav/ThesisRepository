@@ -1,0 +1,4 @@
+{
+    "description": "Abscisic-acid (ABA) elevation as a perturbed initial condition. ABA is the core drought/osmotic-stress hormone; at 0.5 mM it engages the PYL-PP2C-SnRK2 core and downstream ABF/AREB transcription factors.",
+    "set_initial": { "s_ABA_cyt_m": 0.5 }
+}

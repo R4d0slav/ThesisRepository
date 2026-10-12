@@ -1,0 +1,8 @@
+[
+    {
+        "trigger": "time > 10000",
+        "assignments": {
+            "s_JA_cyt_m": "s_JA_cyt_m + 0.0"
+        }
+    }
+]

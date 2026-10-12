@@ -1,0 +1,4 @@
+{
+    "description": "Salicylic-acid (SA) elevation as a perturbed initial condition. SA is the central biotrophic-defence hormone; drives the NPR1/TGA branch of systemic acquired resistance.",
+    "set_initial": { "s_SA_cyt_m": 0.5 }
+}

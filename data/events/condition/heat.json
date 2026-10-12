@@ -1,0 +1,4 @@
+{
+    "description": "Heat stress as a perturbed initial condition (sustained exposure).",
+    "set_initial": { "s_Heat_cyt_ab": 0.05 }
+}

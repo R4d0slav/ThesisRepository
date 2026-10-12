@@ -1,0 +1,4 @@
+{
+    "description": "Jasmonic-acid (JA) elevation as a perturbed initial condition.",
+    "set_initial": { "s_JA_cyt_m": 0.0001 }
+}

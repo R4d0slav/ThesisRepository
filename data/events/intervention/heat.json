@@ -1,0 +1,8 @@
+[
+    {
+        "trigger": "time > 10000",
+        "assignments": {
+            "s_Heat_cyt_ab": "s_Heat_cyt_ab + 0.001"
+        }
+    }
+]

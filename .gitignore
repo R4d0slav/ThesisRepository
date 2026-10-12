@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+.DS_Store
+.git/
+
+# Nextflow runtime & outputs
+work/
+results/
+tmp/
+logs/
+.nextflow/
+.nextflow.log*
+
+documentation/*
+!documentation/PROTOCOL_OVERVIEW.svg

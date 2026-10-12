@@ -1,0 +1,4 @@
+{
+    "description": "Cytosolic Ca2+ influx as a perturbed initial condition. Ca2+ is the universal second messenger of plant stress signalling; decoded by CML/calmodulin and CBL-CIPK kinase modules.",
+    "set_initial": { "s_Ca2_cyt_m": 0.5 }
+}

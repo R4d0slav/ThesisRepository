@@ -1,0 +1,8 @@
+[
+    {
+        "trigger": "time > 10000",
+        "assignments": {
+            "s_Drought_cyt_ab": "s_Drought_cyt_ab + 0.00001"
+        }
+    }
+]

@@ -1,0 +1,15 @@
+{
+    "knockouts": [
+        "s_CBL2_cyt_pa",
+        "s_CBL2Ca2_cyt_c",
+        "s_CBL2CIPK3Ca2_cyt_c",
+        "s_CBL2CIPK9Ca2_cyt_c",
+        "s_CBL2CIPK26Ca2_cyt_c",
+        "s_CBL2CIPK3_cyt_ca",
+        "s_CBL2CIPK9_cyt_ca",
+        "s_CBL2CIPK23_cyt_c",
+        "s_CBL2CIPK26_cyt_ca",
+        "s_CIPK6CBL2_cyt_ca",
+        "s_CIPK16CBL2_cyt_ca"
+    ]
+}

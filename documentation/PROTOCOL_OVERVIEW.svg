@@ -1,0 +1,163 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 820" width="720" height="820">
+  <defs>
+    <!-- Arrow marker -->
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 Z" fill="#555"/>
+    </marker>
+    <marker id="arr-side" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 Z" fill="#999"/>
+    </marker>
+
+    <!-- Subtle drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000015"/>
+    </filter>
+  </defs>
+
+  <!-- ── Background ── -->
+  <rect width="720" height="820" fill="#ffffff"/>
+
+  <!-- ════════════════════════════════════
+       COLUMN 1: MAIN PIPELINE (centre)
+       ════════════════════════════════════ -->
+
+  <!-- ── Block 1: PSS Knowledge Graph ── -->
+  <rect x="200" y="30" width="320" height="68" rx="8" fill="#EEF4FF" stroke="#4A7CC9" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="58" text-anchor="middle" font-size="13.5" font-weight="700" fill="#1a3a72">PSS Knowledge Graph</text>
+  <text x="360" y="78" text-anchor="middle" font-size="11" fill="#4A6FA5">Plant Stress Signalling Network (Arabidopsis thaliana)</text>
+  <text x="360" y="93" text-anchor="middle" font-size="10" fill="#7a9cc7">1139 species · 864 reactions · 9 compartments</text>
+
+  <!-- arrow 1→2 -->
+  <line x1="360" y1="99" x2="360" y2="138" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 2: Network Parsing ── -->
+  <rect x="215" y="139" width="290" height="54" rx="8" fill="#F0FAF3" stroke="#3A9E5F" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="#1a5c33">Network Parsing</text>
+  <text x="360" y="180" text-anchor="middle" font-size="10.5" fill="#4a8c60">Extract species, reactions &amp; topology from SBML</text>
+
+  <!-- arrow 2→3 -->
+  <line x1="360" y1="194" x2="360" y2="243" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 3: Parameter Estimation (tall) ── -->
+  <rect x="170" y="244" width="380" height="158" rx="8" fill="#FFFBEE" stroke="#C9962A" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="268" text-anchor="middle" font-size="13" font-weight="700" fill="#7a5a00">Parameter Estimation</text>
+
+  <!-- 4 sub-boxes inside -->
+  <!-- Row 1 -->
+  <rect x="185" y="277" width="163" height="48" rx="5" fill="#fff" stroke="#e0c060" stroke-width="1"/>
+  <text x="267" y="296" text-anchor="middle" font-size="10" font-weight="600" fill="#7a5a00">Kinetic Parameters</text>
+  <text x="267" y="311" text-anchor="middle" font-size="9" fill="#999">Kcat, Km — BRENDA, SABIO-RK,</text>
+  <text x="267" y="322" text-anchor="middle" font-size="9" fill="#999">CatPred (ML), NIB</text>
+
+  <rect x="362" y="277" width="163" height="48" rx="5" fill="#fff" stroke="#e0c060" stroke-width="1"/>
+  <text x="444" y="296" text-anchor="middle" font-size="10" font-weight="600" fill="#7a5a00">Rate Laws</text>
+  <text x="444" y="311" text-anchor="middle" font-size="9" fill="#999">Kinetic functional forms</text>
+  <text x="444" y="322" text-anchor="middle" font-size="9" fill="#999">mapped via SBO terms</text>
+
+  <!-- Row 2 -->
+  <rect x="185" y="334" width="163" height="48" rx="5" fill="#fff" stroke="#e0c060" stroke-width="1"/>
+  <text x="267" y="353" text-anchor="middle" font-size="10" font-weight="600" fill="#7a5a00">Initial Concentrations</text>
+  <text x="267" y="368" text-anchor="middle" font-size="9" fill="#999">Protein: PaxDb · Metabolite:</text>
+  <text x="267" y="379" text-anchor="middle" font-size="9" fill="#999">literature · Fallback: medians</text>
+
+  <rect x="362" y="334" width="163" height="48" rx="5" fill="#fff" stroke="#e0c060" stroke-width="1"/>
+  <text x="444" y="353" text-anchor="middle" font-size="10" font-weight="600" fill="#7a5a00">Decay Rates</text>
+  <text x="444" y="368" text-anchor="middle" font-size="9" fill="#999">RNA: ATH turnover data</text>
+  <text x="444" y="379" text-anchor="middle" font-size="9" fill="#999">Protein/Metabolite: constants</text>
+
+  <!-- arrow 3→4 -->
+  <line x1="360" y1="403" x2="360" y2="442" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 4: ODE Model Assembly ── -->
+  <rect x="200" y="443" width="320" height="60" rx="8" fill="#FFF0F8" stroke="#B04A8A" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="468" text-anchor="middle" font-size="13" font-weight="700" fill="#7a1a55">ODE Model Assembly</text>
+  <text x="360" y="486" text-anchor="middle" font-size="10.5" fill="#a0467a">Antimony-format kinetic model</text>
+  <text x="360" y="499" text-anchor="middle" font-size="9.5" fill="#b87aa0">Compartments · Species · Rate laws · Parameters · Decay</text>
+
+  <!-- arrow 4→5 -->
+  <line x1="360" y1="504" x2="360" y2="543" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 5: Multi-condition Simulation ── -->
+  <rect x="185" y="544" width="350" height="82" rx="8" fill="#F3F0FF" stroke="#6A4FCB" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="568" text-anchor="middle" font-size="13" font-weight="700" fill="#3a1f8c">Multi-condition Simulation</text>
+  <text x="360" y="584" text-anchor="middle" font-size="10.5" fill="#6A4FCB">Tellurium / libRoadRunner (CVODE integrator)</text>
+
+  <!-- condition pills -->
+  <rect x="196" y="594" width="52" height="20" rx="4" fill="#e8e0ff" stroke="#9980ee" stroke-width="0.8"/>
+  <text x="222" y="608" text-anchor="middle" font-size="9" fill="#4a2fa0">Baseline</text>
+
+  <rect x="254" y="594" width="50" height="20" rx="4" fill="#e8e0ff" stroke="#9980ee" stroke-width="0.8"/>
+  <text x="279" y="608" text-anchor="middle" font-size="9" fill="#4a2fa0">Drought</text>
+
+  <rect x="310" y="594" width="38" height="20" rx="4" fill="#e8e0ff" stroke="#9980ee" stroke-width="0.8"/>
+  <text x="329" y="608" text-anchor="middle" font-size="9" fill="#4a2fa0">Heat</text>
+
+  <rect x="354" y="594" width="30" height="20" rx="4" fill="#e8e0ff" stroke="#9980ee" stroke-width="0.8"/>
+  <text x="369" y="608" text-anchor="middle" font-size="9" fill="#4a2fa0">JA</text>
+
+  <rect x="390" y="594" width="34" height="20" rx="4" fill="#e8e0ff" stroke="#9980ee" stroke-width="0.8"/>
+  <text x="407" y="608" text-anchor="middle" font-size="9" fill="#4a2fa0">ABA</text>
+
+  <rect x="430" y="594" width="48" height="20" rx="4" fill="#ffe8e8" stroke="#e08080" stroke-width="0.8"/>
+  <text x="454" y="608" text-anchor="middle" font-size="9" fill="#8c2020">Knockout</text>
+
+  <text x="360" y="622" text-anchor="middle" font-size="9" fill="#9980ee">+ SA · waterlogging · Trichoderma</text>
+
+  <!-- arrow 5→6 -->
+  <line x1="360" y1="627" x2="360" y2="666" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 6: Synthetic Multi-omics Data ── -->
+  <rect x="190" y="667" width="340" height="60" rx="8" fill="#EEF4FF" stroke="#4A7CC9" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="692" text-anchor="middle" font-size="13" font-weight="700" fill="#1a3a72">Synthetic Multi-omics Data</text>
+  <text x="360" y="710" text-anchor="middle" font-size="10.5" fill="#4A6FA5">Time-series concentrations · Reaction fluxes · Network states</text>
+  <text x="360" y="724" text-anchor="middle" font-size="9.5" fill="#7a9cc7">Benchmarking dataset with known ground-truth mechanisms</text>
+
+  <!-- arrow 6→7 -->
+  <line x1="360" y1="728" x2="360" y2="762" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- ── Block 7: Validation ── -->
+  <rect x="185" y="763" width="350" height="40" rx="8" fill="#F0FAF3" stroke="#3A9E5F" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="780" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1a5c33">Validation</text>
+  <text x="360" y="796" text-anchor="middle" font-size="9.5" fill="#4a8c60">Mathematical sensibility · Gold standards · Biological sensibility (AtSRGA, GO)</text>
+
+
+  <!-- ════════════════════════════════════
+       SIDE ANNOTATION: data sources arrow
+       ════════════════════════════════════ -->
+
+  <!-- Left side bracket for parameter estimation data sources -->
+  <line x1="168" y1="277" x2="88" y2="277" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="168" y1="381" x2="88" y2="381" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="88" y1="277" x2="88" y2="381" stroke="#ccc" stroke-width="1"/>
+
+  <!-- Kinetic DBs label on left -->
+  <text x="84" y="295" text-anchor="end" font-size="9.5" fill="#aaa">BRENDA</text>
+  <text x="84" y="308" text-anchor="end" font-size="9.5" fill="#aaa">SABIO-RK</text>
+  <text x="84" y="321" text-anchor="end" font-size="9.5" fill="#aaa">CatPred</text>
+  <text x="84" y="334" text-anchor="end" font-size="9.5" fill="#aaa">NIB · PaxDb</text>
+  <text x="84" y="347" text-anchor="end" font-size="9.5" fill="#aaa">ATH decay</text>
+  <text x="84" y="360" text-anchor="end" font-size="9.5" fill="#aaa">SBO terms</text>
+
+  <!-- Arrow from data sources line into block -->
+  <line x1="88" y1="329" x2="170" y2="329" stroke="#bbb" stroke-width="1.2" marker-end="url(#arr-side)"/>
+
+  <!-- ════════════════════════════════════
+       RIGHT SIDE: outputs annotation
+       ════════════════════════════════════ -->
+  <line x1="536" y1="585" x2="608" y2="585" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="608" y1="567" x2="608" y2="680" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+  <line x1="536" y1="680" x2="608" y2="680" stroke="#ccc" stroke-width="1" stroke-dasharray="4,3"/>
+
+  <text x="614" y="600" font-size="9.5" fill="#aaa">CSV tables</text>
+  <text x="614" y="614" font-size="9.5" fill="#aaa">Time-series</text>
+  <text x="614" y="628" font-size="9.5" fill="#aaa">Flux data</text>
+  <text x="614" y="642" font-size="9.5" fill="#aaa">Static plots</text>
+  <text x="614" y="656" font-size="9.5" fill="#aaa">Interactive</text>
+  <text x="614" y="670" font-size="9.5" fill="#aaa">HTML plots</text>
+
+  <!-- ── Figure caption ── -->
+  <text x="360" y="815" text-anchor="middle" font-size="9.5" fill="#aaa" font-style="italic">
+    Figure: Overview of the PSS kinetic modelling protocol.
+  </text>
+
+</svg>
